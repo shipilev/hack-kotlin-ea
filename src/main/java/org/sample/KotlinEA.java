@@ -14,23 +14,16 @@ public class KotlinEA {
 
     static final Object MARKER = new Object();
 
-    @Setup
-    public void setup() {
-        // Warm up both branches and mess up the profile.
-        for (int c = 0; c < 100_000; c++) {
-            testWith(MARKER);
-            for (int t = 0; t < 100; t++) {
-                testWith(t);
-            }
-        }
-    }
-
     @Benchmark
-    public void test() {
-        testWith(Integer.valueOf(42));
+    public int test() {
+        int sum = 0;
+        for (int c = 0; c < 1000; c++) {
+            sum += testWith(fastProducer(c));
+        }
+        return sum;
     }
 
-    public int testWith(Object o) {
+    private int testWith(Object o) {
         if (o == MARKER) {
             return -1;
         } else {
@@ -38,4 +31,19 @@ public class KotlinEA {
         }
     }
 
+    // This method may return either MARKER or Integer.
+    // MARKER is RARELY produced.
+    private Object fastProducer(int c) {
+        if (isFast(c)) return Integer.valueOf(c); // fast-path
+        return slowProducer(c); // slow-path
+    }
+
+    private boolean isFast(int c) {
+        return c != 500;
+    }
+
+    // it is RARELY invoked
+    private Object slowProducer(int c) {
+        return MARKER;
+    }
 }
