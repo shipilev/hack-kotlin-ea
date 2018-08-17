@@ -18,12 +18,13 @@ public class KotlinEA {
     public int test() {
         int sum = 0;
         for (int c = 0; c < 1000; c++) {
-            sum += testWith(fastProducer(c));
+            sum += testWith(c);
         }
         return sum;
     }
 
-    private int testWith(Object o) {
+    private int testWith(int c) {
+        Object o = fastProducer(c);
         if (o == MARKER) {
             return -1;
         } else {
